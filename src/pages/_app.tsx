@@ -19,7 +19,7 @@ const { chains, provider } = configureChains(
 )
 
 const { connectors } = getDefaultWallets({
-  appName: 'NFT PFP',
+  appName: 'Twitter ENS',
   chains,
 })
 
@@ -31,7 +31,7 @@ const wagmiClient = createClient({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <PlausibleProvider domain="mintyourpfp.xyz" trackOutboundLinks>
+    <PlausibleProvider domain="enstwitter.xyz" trackOutboundLinks>
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider chains={chains} modalSize="compact">
           <Component {...pageProps} />

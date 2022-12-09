@@ -1,124 +1,386 @@
+import {
+  useAccount,
+  useDisconnect,
+  useNetwork,
+  useEnsName,
+  useEnsResolver,
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from 'wagmi'
+import { hash } from 'eth-ens-namehash'
 import { Toaster } from 'react-hot-toast'
-import { useNetwork } from 'wagmi'
-import { useState } from 'react'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { useEffect, useState } from 'react'
+import Confetti from 'react-confetti'
 import Head from 'next/head'
+import Image from 'next/image'
+import useWindowSize from 'react-use/lib/useWindowSize'
 
-import { getOpenseaUrl } from '../utils/contract'
+import { ENS_RESOLVER_ABI, getEtherscanUrl } from '../utils/contract'
+import { Profile } from '../components/Profile'
+import { usePlausible } from 'next-plausible'
 import Button from '../components/Button'
 import Hero from '../components/Hero'
 import Layout from '../components/Layout'
-import Mint from '../components/Mint'
 import Modal from '../components/Modal'
-import type { State } from '../types'
-import Uploader from '../components/Uploader'
+import type { Nft } from '../types'
+import useNfts from '../hooks/useNfts'
+
+const isDev = process.env.NODE_ENV === 'development'
 
 export default function Home() {
   const { chain } = useNetwork()
+  const { address } = useAccount()
+  const { disconnect } = useDisconnect()
+  const { openConnectModal } = useConnectModal()
+  const { nfts, ensNames, isLoading, isError } = useNfts(address, chain)
+  const { width: windowWidth, height: windowHeight } = useWindowSize()
 
-  const [isMintComplete, setIsMintComplete] = useState(false)
-  const [state, setState] = useState<State>({ status: 'idle' })
-  const [isHelperModalOpen, setIsHelperModalOpen] = useState<boolean>(false)
+  const [isMounted, setIsMounted] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isAvatarSet, setIsAvatarSet] = useState(false)
+  const [selectedNft, setSelectedNft] = useState<Nft | null>(null)
+
+  useEffect(() => setIsMounted(true), [])
 
   return (
     <>
       <Head>
-        <title>Mint Your PFP</title>
-        <meta property="og:title" content="Mint Your PFP" />
+        <title>Set Your ENS Avatar</title>
+        <meta property="og:title" content="Set Your ENS Avatar" />
         <meta property="twitter:creator" content="@gregskril" />
         <meta property="twitter:card" content="summary_large_image" />
-        <meta name="description" content="Easily mint an image as an NFT" />
+        <meta
+          name="description"
+          content="Easily set an NFT as your ENS Avatar"
+        />
         <meta
           property="og:description"
-          content="Easily mint an image as an NFT"
+          content="Easily set an NFT as your ENS Avatar"
         />
         <meta
           property="og:image"
-          content="https://mintyourpfp.xyz/sharing.jpg"
+          content="https://mintyourpfp.xyz/sharing-ens.jpg"
         />
       </Head>
 
       <Toaster />
 
-      <Layout hero={<Hero title="Mint Your PFP" />}>
-        <Uploader state={state} setState={setState} />
-        <Mint state={state} setIsMintComplete={setIsMintComplete} />
+      {isAvatarSet && (
+        <Confetti
+          width={windowWidth}
+          height={windowHeight}
+          colors={['#44BCFO', '#7298F8', '#A099FF', '#DE82FF', '#7F6AFF']}
+          style={{ zIndex: '1000' }}
+        />
+      )}
 
-        {!isMintComplete && (
-          <button className="help" onClick={() => setIsHelperModalOpen(true)}>
-            How does it work?
-          </button>
-        )}
-      </Layout>
+      {isMounted && (
+        <Layout
+          size={address ? 'lg' : 'sm'}
+          hero={<Hero title="Set Your ENS Avatar" />}
+        >
+          {!address && (
+            <Button onClick={openConnectModal}>Connect Wallet</Button>
+          )}
 
-      {isHelperModalOpen && (
-        <div className="help-modal">
-          <Modal setIsOpen={setIsHelperModalOpen}>
-            <h2 className="text-center">How Does It Work?</h2>
-            <p>
-              Some platforms allow their users to set an NFT as a verified
-              avatar. A few examples are{' '}
-              <a
-                href="https://farcasterxyz.notion.site/How-to-get-a-purple-checkmark-fb66f0cb0f5f4f24b699b8f288a2f14a"
-                target="_blank"
-                rel="noreferrer"
+          {isLoading && <p>Loading...</p>}
+          {isError && <p>Error...</p>}
+
+          {address && !isLoading && nfts.length === 0 && (
+            <>
+              <p style={{ margin: '0' }}>
+                You don&apos;t have any NFTs in this wallet.
+              </p>
+              <Button
+                onClick={() => disconnect()}
+                style={{
+                  width: 'fit-content',
+                }}
               >
-                Farcaster
-              </a>
-              ,{' '}
-              <a
-                href="https://support.opensea.io/hc/en-us/articles/4415562648851-How-do-I-set-my-NFT-as-my-Twitter-profile-picture-"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Twitter
-              </a>
-              , and{' '}
-              <a
-                href="https://medium.com/the-ethereum-name-service/step-by-step-guide-to-setting-an-nft-as-your-ens-profile-avatar-3562d39567fc"
-                target="_blank"
-                rel="noreferrer"
-              >
-                ENS
-              </a>
-              .
-            </p>
-            <p style={{ fontWeight: '500', color: '#000' }}>
-              This website makes it easy to turn any image into an NFT that can
-              be used as an avatar on these platforms.
-            </p>
-            <p>
-              It will upload your image to IPFS, a decentralized file storage
-              system, then mint it as an NFT in a{' '}
-              <a href={getOpenseaUrl(chain)} target="_blank" rel="noreferrer">
-                shared collection
-              </a>{' '}
-              on the Ethereum blockchain.
-            </p>
-            <Button
-              variant="secondary"
-              onClick={() => setIsHelperModalOpen(false)}
-            >
-              Close
-            </Button>
-          </Modal>
-        </div>
+                Disconnect
+              </Button>
+            </>
+          )}
+
+          {address && !isLoading && nfts.length > 0 && (
+            <>
+              <div className="nfts">
+                {nfts.map((nft) => {
+                  return (
+                    <div
+                      className="nft"
+                      key={nft.permalink}
+                      onClick={() => {
+                        setSelectedNft(nft)
+                        setIsModalOpen(true)
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={nft?.image_thumbnail_url} alt={nft?.name} />
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+
+          {isModalOpen && (
+            <TransactionModal
+              nft={selectedNft!}
+              ensNames={ensNames}
+              setIsOpen={setIsModalOpen}
+              setIsAvatarSet={setIsAvatarSet}
+            />
+          )}
+        </Layout>
       )}
 
       <style jsx>{`
-        .help {
-          opacity: 0.5;
-          border: none;
-          font-weight: 500;
-          background: none;
-          width: fit-content;
+        .nfts {
+          width: 100%;
+          display: grid;
+          padding: 1rem;
+          gap: 1.5rem 1rem;
+          border-radius: 0.5rem;
+          background-color: #fff;
+          box-shadow: var(--shadow);
+          grid-template-columns: repeat(auto-fill, minmax(9rem, 2fr));
+        }
 
-          &-modal {
-            a {
-              color: #3681f2;
+        .nft {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          &:hover {
+            cursor: pointer;
+          }
+
+          img {
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.15s ease-in-out;
+
+            &:hover {
+              transform: scale(1.04);
             }
+          }
+
+          span {
+            font-size: 0.875rem;
           }
         }
       `}</style>
     </>
+  )
+}
+
+type TransactionModalProps = {
+  nft: Nft
+  ensNames: Nft[]
+  setIsOpen: (isOpen: boolean) => void
+  setIsAvatarSet: (isAvatarSet: boolean) => void
+}
+
+function TransactionModal({
+  nft,
+  ensNames,
+  setIsOpen,
+  setIsAvatarSet,
+}: TransactionModalProps) {
+  const plausible = usePlausible()
+
+  const { chain } = useNetwork()
+  const { address } = useAccount()
+  const { data: ensName } = useEnsName({ address })
+  const { data: ensResolver } = useEnsResolver({
+    name: ensName ?? undefined,
+  })
+
+  const nodehash = ensName && hash(ensName)
+  const avatarStr = `eip155:1/${nft.asset_contract.schema_name.toLowerCase()}:${
+    nft.asset_contract.address
+  }/${nft.token_id}`
+
+  const { config, isError: prepareWriteError } = usePrepareContractWrite({
+    address: ensResolver?.address,
+    abi: ENS_RESOLVER_ABI,
+    functionName: 'setText',
+    args: [nodehash, 'avatar', avatarStr],
+  })
+
+  const { data, write } = useContractWrite(config)
+  const {
+    data: success,
+    isLoading,
+    isError,
+  } = useWaitForTransaction({
+    hash: data?.hash,
+    onSuccess: () => {
+      setIsAvatarSet(true)
+      plausible('Set ENS Avatar', { props: { status: 'success' } })
+    },
+    onError: () => {
+      plausible('Set ENS Avatar', { props: { status: 'error' } })
+    },
+  })
+
+  if (!ensName || !address) {
+    return (
+      <Modal setIsOpen={setIsOpen}>
+        <div style={{ textAlign: 'center' }}>
+          {ensNames.length === 0 && (
+            <>
+              <p>Your connected address doesn&apos;t own an ENS name</p>
+              <Button
+                as="a"
+                href={`https://${
+                  chain?.id === 5 ? 'alpha' : 'app'
+                }.ens.domains/`}
+              >
+                Register a name
+              </Button>
+            </>
+          )}
+
+          {ensNames.length > 0 && (
+            <>
+              <p>Your connected address doesn&apos;t have a primary ENS name</p>
+              <Button as="a" href="https://ezens.xyz/">
+                Set your primary name
+              </Button>
+            </>
+          )}
+        </div>
+      </Modal>
+    )
+  }
+
+  return (
+    <Modal setIsOpen={setIsOpen} canClose={!data}>
+      <h2 className="text-center">Preview Your Profile</h2>
+      <div className="content">
+        <div className="previews">
+          <div className="nft-image">
+            <Image
+              src={`${
+                isDev ? 'http://localhost:3000' : 'https://mintyourpfp.xyz'
+              }/api/ens-avatar?name=${ensName}&src=${nft.image_thumbnail_url}`}
+              alt={nft.name}
+              width={240}
+              height={240}
+            />
+          </div>
+
+          <div className="connections">
+            <Profile
+              name={ensName}
+              address={address}
+              image={nft?.image_thumbnail_url}
+            />
+            <Profile
+              site="rainbow"
+              name={ensName}
+              address={address}
+              image={nft.image_thumbnail_url}
+            />
+          </div>
+        </div>
+
+        {!data && (
+          <Button disabled={!write} onClick={() => write?.()}>
+            Set Twitter
+          </Button>
+        )}
+
+        {prepareWriteError && (
+          <p className="text-center" style={{ color: '#ED7B7B' }}>
+            Only the controller of {ensName} can set the twitter
+          </p>
+        )}
+
+        {isLoading && (
+          <Button as="a" href={getEtherscanUrl(data!, chain)} loading>
+            View on Etherscan
+          </Button>
+        )}
+
+        {isError && (
+          <Button as="a" href={getEtherscanUrl(data!, chain)} state="error">
+            Transaction failed
+          </Button>
+        )}
+
+        {success && (
+          <Button
+            as="a"
+            href={`https://${
+              chain?.id === 5
+                ? 'alpha.ens.domains/profile'
+                : 'app.ens.domains/name'
+            }/${ensName}`}
+            state="success"
+          >
+            View in ENS Manager
+          </Button>
+        )}
+      </div>
+
+      <style jsx>{`
+        .content {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          align-items: center;
+          margin: 0 auto;
+        }
+
+        img {
+          aspect-ratio: 1;
+          object-fit: cover;
+          border-radius: 0.5rem;
+        }
+
+        .previews {
+          display: flex;
+          flex-direction: column-reverse;
+          align-items: center;
+          width: 100%;
+          gap: 1rem;
+
+          @media (min-width: 32em) {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+          }
+
+          @media (min-width: 38em) {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .nft-image {
+            line-height: 1;
+            border-radius: 0.5rem;
+            background: #dadfe9;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+          }
+
+          .connections {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+
+            @media (min-width: 32em) {
+              gap: 1rem;
+            }
+          }
+        }
+      `}</style>
+    </Modal>
   )
 }
