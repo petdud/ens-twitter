@@ -15,7 +15,7 @@ export function TwitterPreview({
   username: string,
   isTwitterValid: boolean
 }) {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [isError, setIsError] = React.useState(false);
   const [twitterData, setTwitterData] = React.useState<ITwitterData | null>(null);
 
@@ -41,7 +41,17 @@ export function TwitterPreview({
   }
 
   if (isLoading) {
-    return <div>Loading profile data...</div>
+    return (
+      <>
+        <div className="loading">Loading profile data...</div>
+        <style jsx>{`
+          .loading {
+            font-size: 1.1rem;
+            text-align: center;
+          }
+       `}</style>
+      </>
+    )
   }
 
   if (isError || (!isLoading && (!twitterData || !twitterData?.username || !twitterData?.name))) {
@@ -56,15 +66,15 @@ export function TwitterPreview({
           </div>
         </div>
         <style jsx>{`
-        .twitter-link {
-          text-decoration: underline;
-          font-size: 1.1rem;
-          text-align: center;
-          margin-bottom: 1.5rem;
-          color: #555;
-          font-weight: 600;
-        }
-      `}</style>
+          .twitter-link {
+            text-decoration: underline;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #555;
+            font-weight: 600;
+          }
+       `}</style>
       </>
     )
   }
@@ -98,7 +108,7 @@ export function TwitterPreview({
           border-radius: 10rem;
           width: fit-content;
           overflow: hidden;
-          margin: 0.75rem auto;
+          margin: 1rem auto;
           transition: transform 0.15s ease-in-out;
           .address {
             font-size: 1.1rem;
