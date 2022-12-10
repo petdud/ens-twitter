@@ -145,7 +145,7 @@ export default function Home() {
             </>
           )}
 
-          {currentTwitterName && (
+          {address && currentTwitterName && (
             <>
               <p style={{ margin: '0', textAlign: "center" }}>
                 Your connected address has already set a Twitter username to <br /><span style={{fontWeight: 700}}>{currentTwitterName}</span> and {isTwitterUsernameValid(currentTwitterName) ? "it seems to be in a valid format" : "but it seems to be in an invalid format"}.
