@@ -26,13 +26,16 @@ import useNfts from '../hooks/useNfts'
 import { ArrowIcon, ErrorIcon } from '../assets/icons'
 import { isTwitterUsernameValid } from '../utils/helpers'
 import { TwitterPreview } from '../components/TwitterPreview';
+import { ethers } from "ethers";
+import React from 'react';
 
-const isDev = process.env.NODE_ENV === 'development'
+
+const url = `https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_KEY}`;
+const provider = new ethers.providers.JsonRpcProvider(url);
 
 export default function Home() {
   const { chain } = useNetwork()
   const { address } = useAccount()
-  const { disconnect } = useDisconnect()
   const { openConnectModal } = useConnectModal()
   const { ensNames, isLoading, isError } = useNfts(address, chain)
   const { width: windowWidth, height: windowHeight } = useWindowSize()
@@ -41,20 +44,30 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isTwitterSet, setIsTwitterSet] = useState(false)
   const [twitterName, setTwitterName] = useState<string | null>(null)
+  const [currentTwitterName, setCurrentTwitterName] = useState<string | null>(null)
 
   const { data: ensName } = useEnsName({ address, chainId: chain?.id })
 
-  useEffect(() => setIsMounted(true), []);
+  const getEnsTwitter = async (ensName: string) => {
+    const resolver = await provider?.getResolver(ensName);
+    const twitter = await resolver?.getText("com.twitter");
+    twitter && setCurrentTwitterName(twitter);
+  };
+
+  useEffect(() => {
+    setIsMounted(true);
+    ensName && getEnsTwitter(ensName);
+  }, [ensName]);
+
   const [text, setText] = useState<string | undefined | null>(null)
 
-  async function handleSubmit(e: FormEvent) {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (text) {
       setTwitterName(text)
       setIsModalOpen(true);
     }
   }
-
 
   return (
     <>
@@ -129,6 +142,15 @@ export default function Home() {
               >
                 Register a name
               </Button>
+            </>
+          )}
+
+          {currentTwitterName && (
+            <>
+              <p style={{ margin: '0', textAlign: "center" }}>
+                Your connected address has already set a Twitter username to <br /><span style={{fontWeight: 700}}>{currentTwitterName}</span> and {isTwitterUsernameValid(currentTwitterName) ? "it seems to be in a valid format" : "but it seems to be in an invalid format"}.
+              </p>
+              <p>Do you want to update it?</p>
             </>
           )}
 
