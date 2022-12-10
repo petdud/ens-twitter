@@ -71,16 +71,18 @@ export function TwitterPreview({
 
   return (
     <>
-      <Link href={`https://www.twitter.com/${twitterData.username}`} target="_blank" >
-        <div className='profile'>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {twitterData?.profile_image_url && <img src={twitterData?.profile_image_url} alt="twitter profile picture" aria-hidden="true" width={46} height={46} />}
-              <div className="right">
-                <span className="name">{twitterData?.name}</span>
-                <span className="address">{twitterData?.username}</span>
-              </div>
-        </div>
-      </Link>
+      {twitterData && 
+        <Link href={`https://www.twitter.com/${twitterData.username}`} target="_blank" >
+          <div className='profile'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {twitterData.profile_image_url && <img src={twitterData.profile_image_url} alt="twitter profile picture" aria-hidden="true" width={46} height={46} />}
+                <div className="right">
+                  <span className="name">{twitterData.name}</span>
+                  <span className="address">{twitterData.username}</span>
+                </div>
+          </div>
+        </Link>
+      }
 
       <style jsx>{`
         .profile {
