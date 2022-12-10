@@ -8,24 +8,24 @@ import {
   usePrepareContractWrite,
   useWaitForTransaction,
 } from 'wagmi'
+import Link from "next/link";
 import { hash } from 'eth-ens-namehash'
 import { Toaster } from 'react-hot-toast'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useEffect, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import Confetti from 'react-confetti'
 import Head from 'next/head'
-import Image from 'next/image'
 import useWindowSize from 'react-use/lib/useWindowSize'
 
 import { ENS_RESOLVER_ABI, getEtherscanUrl } from '../utils/contract'
-import { Profile } from '../components/Profile'
-import { usePlausible } from 'next-plausible'
 import Button from '../components/Button'
 import Hero from '../components/Hero'
 import Layout from '../components/Layout'
 import Modal from '../components/Modal'
-import type { Nft } from '../types'
 import useNfts from '../hooks/useNfts'
+import { ArrowIcon, ErrorIcon } from '../assets/icons'
+import { isTwitterUsernameValid } from '../utils/helpers'
+import { TwitterPreview } from '../components/TwitterPreview';
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -34,40 +34,52 @@ export default function Home() {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const { openConnectModal } = useConnectModal()
-  const { nfts, ensNames, isLoading, isError } = useNfts(address, chain)
+  const { ensNames, isLoading, isError } = useNfts(address, chain)
   const { width: windowWidth, height: windowHeight } = useWindowSize()
 
   const [isMounted, setIsMounted] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isAvatarSet, setIsAvatarSet] = useState(false)
-  const [selectedNft, setSelectedNft] = useState<Nft | null>(null)
+  const [isTwitterSet, setIsTwitterSet] = useState(false)
+  const [twitterName, setTwitterName] = useState<string | null>(null)
 
-  useEffect(() => setIsMounted(true), [])
+  const { data: ensName } = useEnsName({ address, chainId: chain?.id })
+
+  useEffect(() => setIsMounted(true), []);
+  const [text, setText] = useState<string | undefined | null>(null)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (text) {
+      setTwitterName(text)
+      setIsModalOpen(true);
+    }
+  }
+
 
   return (
     <>
       <Head>
-        <title>Set Your ENS Avatar</title>
-        <meta property="og:title" content="Set Your ENS Avatar" />
-        <meta property="twitter:creator" content="@gregskril" />
+        <title>Set Your ENS Twitter</title>
+        <meta property="og:title" content="Set Your ENS Twitter" />
+        <meta property="twitter:creator" content="@petrdu" />
         <meta property="twitter:card" content="summary_large_image" />
         <meta
           name="description"
-          content="Easily set an NFT as your ENS Avatar"
+          content="Easily set a Twitter name on your ENS"
         />
         <meta
           property="og:description"
-          content="Easily set an NFT as your ENS Avatar"
+          content="Easily set a Twitter name on your ENS"
         />
         <meta
           property="og:image"
-          content="https://mintyourpfp.xyz/sharing-ens.jpg"
+          content="/public/ens.jpeg"
         />
       </Head>
 
       <Toaster />
 
-      {isAvatarSet && (
+      {isTwitterSet && (
         <Confetti
           width={windowWidth}
           height={windowHeight}
@@ -79,7 +91,7 @@ export default function Home() {
       {isMounted && (
         <Layout
           size={address ? 'lg' : 'sm'}
-          hero={<Hero title="Set Your ENS Avatar" />}
+          hero={<Hero title="Set Your ENS Twitter" />}
         >
           {!address && (
             <Button onClick={openConnectModal}>Connect Wallet</Button>
@@ -88,50 +100,64 @@ export default function Home() {
           {isLoading && <p>Loading...</p>}
           {isError && <p>Error...</p>}
 
-          {address && !isLoading && nfts.length === 0 && (
+          {address && !isLoading && ensNames.length === 0 && (
             <>
               <p style={{ margin: '0' }}>
-                You don&apos;t have any NFTs in this wallet.
+                Your connected address doesn&apos;t own an ENS name
               </p>
               <Button
-                onClick={() => disconnect()}
-                style={{
-                  width: 'fit-content',
-                }}
+                as="a"
+                href={`https://${
+                  chain?.id === 5 ? 'alpha' : 'app'
+                }.ens.domains/`}
               >
-                Disconnect
+                Register a name
               </Button>
             </>
           )}
 
-          {address && !isLoading && nfts.length > 0 && (
+          {address && !isLoading && !ensName && ensNames.length > 0 && (
             <>
-              <div className="nfts">
-                {nfts.map((nft) => {
-                  return (
-                    <div
-                      className="nft"
-                      key={nft.permalink}
-                      onClick={() => {
-                        setSelectedNft(nft)
-                        setIsModalOpen(true)
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={nft?.image_thumbnail_url} alt={nft?.name} />
-                    </div>
-                  )
-                })}
+              <p style={{ margin: '0' }}>
+                Your connected address doesn&apos;t have a primary ENS name.
+              </p>
+              <Button
+                as="a"
+                href={`https://${
+                  chain?.id === 5 ? 'alpha' : 'app'
+                }.ens.domains/`}
+              >
+                Register a name
+              </Button>
+            </>
+          )}
+
+          {address && !isLoading && ensName && (
+            <>
+              <div>
+                <form onSubmit={async (e) => await handleSubmit(e)}>
+                  <input
+                    type="text"
+                    name="text"
+                    id="text"
+                    placeholder="username"
+                    autoFocus
+                    onChange={(e) => setText(e.target.value)}
+                  />
+                  <button type="submit" disabled={!text}>
+                    <ArrowIcon disabled={!text || text.length < 3} />
+                  </button>
+                </form>
               </div>
             </>
           )}
 
-          {isModalOpen && (
+          {isModalOpen && ensName && twitterName && (
             <TransactionModal
-              nft={selectedNft!}
-              ensNames={ensNames}
+              ensName={ensName}
+              twitterName={twitterName}
               setIsOpen={setIsModalOpen}
-              setIsAvatarSet={setIsAvatarSet}
+              setIsTwitterSet={setIsTwitterSet}
             />
           )}
         </Layout>
@@ -174,44 +200,78 @@ export default function Home() {
             font-size: 0.875rem;
           }
         }
+
+        form {
+          position: relative;
+
+          & > * {
+            outline-color: var(--color-primary);
+          }
+
+          input {
+            background: #fff;
+            border: none;
+            font-size: 1.25rem;
+            border-radius: 0.5rem;
+            padding: 1rem 3.5rem 1rem 1.25rem;
+            width: 100%;
+          }
+
+          button {
+            background: none;
+            border: none;
+            position: absolute;
+            border-radius: 5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            top: 50%;
+            right: 0.75rem;
+            bottom: 0;
+            transform: translateY(-50%) scale(1.3);
+
+            &:disabled {
+              cursor: not-allowed;
+            }
+          }
+        }
+
+
       `}</style>
     </>
   )
 }
 
 type TransactionModalProps = {
-  nft: Nft
-  ensNames: Nft[]
+  ensName: string
+  twitterName: string
   setIsOpen: (isOpen: boolean) => void
-  setIsAvatarSet: (isAvatarSet: boolean) => void
+  setIsTwitterSet: (isTwitterSet: boolean) => void
 }
 
 function TransactionModal({
-  nft,
-  ensNames,
+  ensName,
+  twitterName,
   setIsOpen,
-  setIsAvatarSet,
+  setIsTwitterSet,
 }: TransactionModalProps) {
-  const plausible = usePlausible()
-
+  // const plausible = usePlausible()
   const { chain } = useNetwork()
-  const { address } = useAccount()
-  const { data: ensName } = useEnsName({ address })
-  const { data: ensResolver } = useEnsResolver({
-    name: ensName ?? undefined,
+  const { data: ensResolver, } = useEnsResolver({
+    name: ensName ?? undefined, chainId: chain?.id
   })
-
   const nodehash = ensName && hash(ensName)
-  const avatarStr = `eip155:1/${nft.asset_contract.schema_name.toLowerCase()}:${
-    nft.asset_contract.address
-  }/${nft.token_id}`
 
   const { config, isError: prepareWriteError } = usePrepareContractWrite({
     address: ensResolver?.address,
     abi: ENS_RESOLVER_ABI,
     functionName: 'setText',
-    args: [nodehash, 'avatar', avatarStr],
+    args: [nodehash, 'com.twitter', twitterName],
   })
+
+  const isTwitterValid = isTwitterUsernameValid(twitterName);
 
   const { data, write } = useContractWrite(config)
   const {
@@ -221,87 +281,59 @@ function TransactionModal({
   } = useWaitForTransaction({
     hash: data?.hash,
     onSuccess: () => {
-      setIsAvatarSet(true)
-      plausible('Set ENS Avatar', { props: { status: 'success' } })
+      setIsTwitterSet(true)
+      // plausible('Set ENS Twitter', { props: { status: 'success' } })
     },
     onError: () => {
-      plausible('Set ENS Avatar', { props: { status: 'error' } })
+      // plausible('Set ENS Twitter', { props: { status: 'error' } })
     },
   })
 
-  if (!ensName || !address) {
-    return (
-      <Modal setIsOpen={setIsOpen}>
-        <div style={{ textAlign: 'center' }}>
-          {ensNames.length === 0 && (
-            <>
-              <p>Your connected address doesn&apos;t own an ENS name</p>
-              <Button
-                as="a"
-                href={`https://${
-                  chain?.id === 5 ? 'alpha' : 'app'
-                }.ens.domains/`}
-              >
-                Register a name
-              </Button>
-            </>
-          )}
-
-          {ensNames.length > 0 && (
-            <>
-              <p>Your connected address doesn&apos;t have a primary ENS name</p>
-              <Button as="a" href="https://ezens.xyz/">
-                Set your primary name
-              </Button>
-            </>
-          )}
-        </div>
-      </Modal>
-    )
-  }
-
   return (
     <Modal setIsOpen={setIsOpen} canClose={!data}>
-      <h2 className="text-center">Preview Your Profile</h2>
+      <h2 className="text-center">{isTwitterValid ? "Is this your Twitter account?" : "Oooops..."}</h2>
       <div className="content">
-        <div className="previews">
-          <div className="nft-image">
-            <Image
-              src={`${
-                isDev ? 'http://localhost:3000' : 'https://mintyourpfp.xyz'
-              }/api/ens-avatar?name=${ensName}&src=${nft.image_thumbnail_url}`}
-              alt={nft.name}
-              width={240}
-              height={240}
-            />
-          </div>
-
-          <div className="connections">
-            <Profile
-              name={ensName}
-              address={address}
-              image={nft?.image_thumbnail_url}
-            />
-            <Profile
-              site="rainbow"
-              name={ensName}
-              address={address}
-              image={nft.image_thumbnail_url}
-            />
-          </div>
-        </div>
-
-        {!data && (
-          <Button disabled={!write} onClick={() => write?.()}>
-            Set Twitter
-          </Button>
+        {!isTwitterValid && (
+          <>
+            <div className="error">
+              <ErrorIcon />
+              <p style={{ color: '#ED7B7B' }}>
+                It seems <b>{twitterName}</b> is not a valid Twitter username.
+              </p>
+            </div>
+            <div>
+              <p>Your username should be between 1 and 15 characters long and can only contain letters, numbers, and underscores.</p>
+              <p>You can get it from the URL of your Twitter profile https://www.twitter.com/<span style={{color: 'green', fontWeight: 700}}>{`<your_username>`}</span></p>
+            </div>
+            <Button onClick={() => setIsOpen(false)}>
+              Go back
+            </Button>
+          </>
         )}
 
         {prepareWriteError && (
-          <p className="text-center" style={{ color: '#ED7B7B' }}>
-            Only the controller of {ensName} can set the twitter
-          </p>
+          <>
+            <p className="text-center" style={{ color: '#ED7B7B' }}>
+              Only the controller of {ensName} can set the twitter
+            </p>
+            <Button onClick={() => setIsOpen(false)}>
+              Go back
+            </Button>
+          </>
         )}
+
+        {!data && isTwitterValid && !prepareWriteError && (
+          <>
+            <TwitterPreview username={twitterName} isTwitterValid={isTwitterValid} />
+            <Button disabled={!write} onClick={() => write?.()}>
+              Set Twitter name
+            </Button>
+            <Link  href="#" onClick={() => setIsOpen(false)} style={{textDecoration: "underline", textAlign: "center", fontSize: "12px"}}>
+              Go back
+            </Link>
+          </>
+        )}
+
 
         {isLoading && (
           <Button as="a" href={getEtherscanUrl(data!, chain)} loading>
@@ -335,14 +367,13 @@ function TransactionModal({
           display: flex;
           flex-direction: column;
           gap: 1rem;
-          align-items: center;
-          margin: 0 auto;
         }
 
-        img {
-          aspect-ratio: 1;
-          object-fit: cover;
-          border-radius: 0.5rem;
+        .error {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .previews {

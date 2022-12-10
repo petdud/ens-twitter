@@ -1,58 +1,46 @@
-import { useEffect, useState } from 'react'
-import { useNetwork } from 'wagmi'
-import Link from 'next/link'
-
-import { getContractAddress } from '../utils/contract'
-import Feedback from './Feedback'
-
 export default function Footer() {
-  const [isHome, setIsHome] = useState(false)
-  useEffect(() => setIsHome(window.location.pathname === '/'), [])
-
-  const { chain } = useNetwork()
-
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
-
-  const etherscanUrl =
-    chain?.id === 5
-      ? `https://goerli.etherscan.io/address/${getContractAddress(chain?.id)}`
-      : `https://etherscan.io/address/${getContractAddress(chain?.id)}`
-
   return (
     <>
       <footer>
         <div className="links">
           <a
-            href="https://twitter.com/gregskril"
+            href="https://twitter.com/petrdu"
             target="_blank"
             rel="noreferrer"
           >
-            @gregskril
+            @petrdu
           </a>
         </div>
 
         <div className="links">
           <span>
-            {isHome && <Link href="/ens">ENS Avatar</Link>}
-            {!isHome && <Link href="/">Home</Link>}
+            <a 
+              href="https://www.twittens.xyz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Twittens
+            </a>
           </span>
 
           <a
-            href="https://github.com/gskril/nft-pfp"
+            href="https://github.com/petdud/ens-twitter"
             target="_blank"
             rel="noreferrer"
           >
             GitHub
           </a>
 
-          <button onClick={() => setIsFeedbackOpen(!isFeedbackOpen)}>
-            Feedback
-          </button>
+          <span>
+            <a 
+              href={process.env.NEXT_PUBLIC_FEEDBACK_FORM as any}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Feedback
+            </a>
+          </span>
 
-          {isFeedbackOpen && <Feedback setIsOpen={setIsFeedbackOpen} />}
         </div>
       </footer>
 

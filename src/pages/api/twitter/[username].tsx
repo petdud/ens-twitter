@@ -1,15 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-const NOTIFY_API = process.env.NOTIFY_API
+const TWITTER_API = process.env.NEXT_PUBLIC_TWITTER_API
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>
 ) {
-  const { text } = req.body
-  const endpoint = `${NOTIFY_API}?text=Feedback from mintyourpfp: `
+  const username = req.query.username;
 
-  await fetch(endpoint + text)
+  if (!TWITTER_API) {
+    res.status(500).json({error: "Twitter API not provided."})
+  }
+
+
+  if (!username) {
+    res.status(500).json({error: "Username not provided."})
+  }
+
+  const endpoint = `${TWITTER_API}${username}`;
+
+  await fetch(endpoint)
     .then((res) => res.json())
     .then((json) => {
       if (json.error) throw new Error(json.error)

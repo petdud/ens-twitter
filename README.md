@@ -1,19 +1,14 @@
 # Mint your PFP as an NFT
 
-This is a simple app to upload/pin an image to IPFS and mint it as an NFT on a shared Ethereum smart contract.
+This is a simple app to update a Twitter text record in your ENS (Ethereum Name Service). It will also notify [Twittens.xyz](https://www.twittens.xyz) to udpate your address if you are in any of the supported NFT collections.
 
-Built on top of the [OpenNFT](https://github.com/DigOppGroup/OpenNFT) contract:
+It interacts directly with the ENS Public Resolver contract of the `setText` function: [see the contract on etherscan.io](https://etherscan.io/address/0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41)
 
-- Mainnet: [0x4A4f4A202C840f7247CfCb429e1B41A5509176D8](https://etherscan.io/address/0x4A4f4A202C840f7247CfCb429e1B41A5509176D8)
-- Goerli: [0xfbaD712D849144f0471cE5d2e47E6295042C8625](https://goerli.etherscan.io/address/0xfbaD712D849144f0471cE5d2e47E6295042C8625)
+
+This is a modified project of forked repository of my fren @gregskril. He created a project to easily update your ENS avatar, which is super-cool: [mintyourpfp.xyz](https://mintyourpfp.xyz/)!
 
 ## Getting Started
 
-- Signup for [Pinata](pinata.cloud) and create an API key
-- Run `cp .env.example .env.local` and enter your Pinata API key and secret
+- Run `cp .env.example .env.local` and enter your Infura key
 - Run `yarn` to install dependencies
 - Run `yarn dev` to start the development server
-
-## Deploy on Railway
-
-The typical Vercel deployment flow does not work with this app because it requires a server that can read/write to the filesystem. I personally use [Railway](railway.app) to host stuff like this, but I'm sure Heroku or Render would work as well.
