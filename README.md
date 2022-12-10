@@ -1,6 +1,6 @@
-# Mint your PFP as an NFT
+# Set your ENS Twitter
 
-This is a simple app to update a Twitter text record in your ENS (Ethereum Name Service). It will also notify [Twittens.xyz](https://www.twittens.xyz) to udpate your address if you are in any of the supported NFT collections.
+This is a simple app to update a Twitter text record in your ENS (Ethereum Name Service).
 
 It interacts directly with the ENS Public Resolver contract of the `setText` function: [see the contract on etherscan.io](https://etherscan.io/address/0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41)
 
