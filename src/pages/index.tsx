@@ -313,7 +313,12 @@ function TransactionModal({
 
   return (
     <Modal setIsOpen={setIsOpen} canClose={!data}>
-      <h2 className="text-center">{isTwitterValid ? "Is this your Twitter account?" : "Oooops..."}</h2>
+      <h2 className="text-center">
+        {!isLoading && isTwitterValid && !success ? "Is this your Twitter account?" : "Oooops..."}
+        {isLoading && "Submitting...."}
+        {!isLoading && success && "Your Twitter name has been set! 🥳"}
+        
+      </h2>
       <div className="content">
         {!isTwitterValid && (
           <>
