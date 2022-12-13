@@ -353,7 +353,7 @@ function TransactionModal({
   setIsOpen,
   setIsTwitterSet,
 }: TransactionModalProps) {
-  // const plausible = usePlausible()
+  const { address } = useAccount()
   const { chain } = useNetwork()
   const { data: ensResolver, } = useEnsResolver({
     name: ensName ?? undefined, chainId: chain?.id
@@ -378,10 +378,10 @@ function TransactionModal({
     hash: data?.hash,
     onSuccess: () => {
       setIsTwitterSet(true)
-      // plausible('Set ENS Twitter', { props: { status: 'success' } })
+      address && notifyTwittens(address);
     },
     onError: () => {
-      // plausible('Set ENS Twitter', { props: { status: 'error' } })
+      // do something
     },
   })
 
@@ -517,3 +517,11 @@ function TransactionModal({
     </Modal>
   )
 }
+
+const notifyTwittens = async (walletAddress: string) => {  
+  try {
+    await fetch(`/api/twitter/update/${walletAddress}`);
+  } catch(err) {
+    console.error("error notify twittens", err);
+  }
+};
