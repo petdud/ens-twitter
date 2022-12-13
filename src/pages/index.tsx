@@ -427,12 +427,16 @@ function TransactionModal({
         {isTwitterValid && !prepareWriteError && (
           <>
             <TwitterPreview username={twitterName} isTwitterValid={isTwitterValid} />
-            <Button disabled={!write} onClick={() => write?.()}>
-              Set Twitter name
-            </Button>
-            <Link  href="#" onClick={() => setIsOpen(false)} style={{textDecoration: "underline", textAlign: "center", fontSize: "12px"}}>
-              Go back
-            </Link>
+            {!data &&              
+              <>
+                <Button disabled={!write} onClick={() => write?.()}>
+                  Set Twitter name
+                </Button>
+                <Link  href="#" onClick={() => setIsOpen(false)} style={{textDecoration: "underline", textAlign: "center", fontSize: "12px"}}>
+                  Go back
+                </Link>
+              </>
+            }
           </>
         )}
 
