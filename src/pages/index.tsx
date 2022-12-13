@@ -388,7 +388,8 @@ function TransactionModal({
   return (
     <Modal setIsOpen={setIsOpen} canClose={!data}>
       <h2 className="text-center">
-        {!isLoading && isTwitterValid && !success ? "Is this your Twitter account?" : "Oooops..."}
+        {!isLoading && isTwitterValid && !success && "Is this your Twitter account?"}
+        {!isLoading && !isTwitterValid && "Oooops..."}
         {isLoading && "Submitting...."}
         {!isLoading && success && "Your Twitter name has been set! 🥳"}
         
@@ -423,7 +424,7 @@ function TransactionModal({
           </>
         )}
 
-        {!data && isTwitterValid && !prepareWriteError && (
+        {isTwitterValid && !prepareWriteError && (
           <>
             <TwitterPreview username={twitterName} isTwitterValid={isTwitterValid} />
             <Button disabled={!write} onClick={() => write?.()}>
