@@ -39,6 +39,7 @@ export default function Home() {
   const { openConnectModal } = useConnectModal()
   const { ensNames, isLoading, isError } = useNfts(address, chain)
   const { width: windowWidth, height: windowHeight } = useWindowSize()
+  const [isHelperModalOpen, setIsHelperModalOpen] = useState<boolean>(false)
 
   const [isMounted, setIsMounted] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -149,9 +150,9 @@ export default function Home() {
           {address && currentTwitterName && (
             <>
               <p style={{ margin: '0', textAlign: "center" }}>
-                Your connected address has already set a Twitter username to <br /><span style={{fontWeight: 700}}>{currentTwitterName}</span> and {isTwitterUsernameValid(currentTwitterName) ? "it seems to be in a valid format" : "but it seems to be in an invalid format"}.
+                Your connected address has already set a Twitter username to <br /><span style={{fontWeight: 700}}>{currentTwitterName}</span>{isTwitterUsernameValid(currentTwitterName) ? "" : " but it seems to be in an invalid format"}.
               </p>
-              <p>Do you want to update it?</p>
+              <p>Would you like to update it?</p>
             </>
           )}
 
@@ -183,6 +184,61 @@ export default function Home() {
               setIsTwitterSet={setIsTwitterSet}
             />
           )}
+
+          <button className="help" onClick={() => setIsHelperModalOpen(true)}>
+            How does it work?
+          </button> 
+
+          {isHelperModalOpen && (
+            <div className="help-modal">
+              <Modal setIsOpen={setIsHelperModalOpen}>
+                <h2 className="text-center">How Does It Work?</h2>
+                <p>ENS allows owners to associate their Twitter handle and other text records, such as an email address, URL, or Discord, with their ENS name.</p>
+                <p style={{ fontWeight: '500', color: '#000' }}>
+                  This website makes it easy to set your Twitter handle on your ENS name with just a few clicks.
+                </p>
+
+                <p>Once you link your Twitter handle to your ENS name, some websites will automatically display the information on your wallet profile. For example, {' '}
+
+                  <a
+                    href="https://twittens.xyz"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Twittens
+                  </a>
+                  ,{' '}
+                  <a
+                    href="https://rainbow.me/1540.eth"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Rainbow
+                  </a>
+                  , and{' '}
+                  <a
+                    href="https://app.ens.domains/name/1540.eth/details"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    ENS{' '}
+                  </a>
+                  all support this feature.
+                </p>
+
+                <p>
+                  If you want to link more information than just a twitter, we recommend using the ENS portal directly. You can find more information and instructions <a href={"https://dudis.notion.site/How-to-add-your-Twitter-df8b2389dd664d08a85eb333b32f076d"} target="_blank" rel="noreferrer">in our guide</a>.
+                </p>
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsHelperModalOpen(false)}
+                >
+                  Close
+                </Button>
+              </Modal>
+            </div>
+          )}
+
         </Layout>
       )}
 
@@ -257,6 +313,23 @@ export default function Home() {
 
             &:disabled {
               cursor: not-allowed;
+            }
+          }
+        }
+        .help {
+          margin-top: 1rem;
+          opacity: 0.5;
+          border: none;
+          font-weight: 500;
+          background: none;
+          width: fit-content;
+          :hover {
+            text-decoration: underline;
+          }
+
+          &-modal {
+            a {
+              color: #3681f2;
             }
           }
         }
