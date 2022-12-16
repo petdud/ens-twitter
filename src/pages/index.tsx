@@ -89,7 +89,7 @@ export default function Home() {
           property="og:image"
           content="/public/ens.jpeg"
         />
-        <script async defer data-website-id="a5a49e01-4e16-4e75-92a5-7f66a6969ac1" src="https://twittens-lytics.up.railway.app/umami.js"></script>
+        <script async defer data-website-id="2bc74b8b-197d-45e2-a0a2-0dc502093a36" src="https://umammprod.up.railway.app/umami.js"></script>
       </Head>
 
       <Toaster />
