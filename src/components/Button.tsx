@@ -6,6 +6,7 @@ type ButtonProps = {
   variant?: 'secondary'
   loading?: boolean
   state?: 'success' | 'error'
+  className?: string,
   disabled?: boolean
   children: string
   onClick?: () => void
@@ -17,6 +18,7 @@ export default function Button({
   href,
   variant,
   loading,
+  className,
   state,
   disabled,
   children,
@@ -26,7 +28,7 @@ export default function Button({
   return (
     <>
       {as === 'a' ? (
-        <a href={href} target="_blank" rel="noreferrer" style={style}>
+        <a href={href} className={className} target="_blank" rel="noreferrer" style={style}>
           {children}
           {loading && <LoadingIcon theme="light" />}
         </a>
@@ -36,6 +38,7 @@ export default function Button({
           type="button"
           style={style}
           disabled={disabled}
+          className={className}
         >
           {children}
           {loading && <LoadingIcon theme="light" />}

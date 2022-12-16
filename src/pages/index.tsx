@@ -109,7 +109,7 @@ export default function Home() {
           hero={<Hero title="Set Your ENS Twitter" />}
         >
           {!address && (
-            <Button onClick={openConnectModal}>Connect Wallet</Button>
+            <Button className="umami--click--connect-wallet-button" onClick={openConnectModal}>Connect Wallet</Button>
           )}
 
           {isLoading && <p>Loading...</p>}
@@ -122,6 +122,7 @@ export default function Home() {
               </p>
               <Button
                 as="a"
+                className="umami--click--register-ens-name-button"
                 href={`https://${
                   chain?.id === 5 ? 'alpha' : 'app'
                 }.ens.domains/`}
@@ -141,6 +142,7 @@ export default function Home() {
                 href={`https://${
                   chain?.id === 5 ? 'alpha' : 'app'
                 }.ens.domains/`}
+                className="umami--click--register-primary-ens-button"
               >
                 Register a name
               </Button>
@@ -168,7 +170,7 @@ export default function Home() {
                     autoFocus
                     onChange={(e) => setText(e.target.value)}
                   />
-                  <button type="submit" disabled={!text}>
+                  <button type="submit" disabled={!text} className="umami--click--preview-twitter-account-button">
                     <ArrowIcon disabled={!text || text.length < 3} />
                   </button>
                 </form>
@@ -185,7 +187,7 @@ export default function Home() {
             />
           )}
 
-          <button className="help" onClick={() => setIsHelperModalOpen(true)}>
+          <button className="help umami--click--how-it-works-link" onClick={() => setIsHelperModalOpen(true)}>
             How does it work?
           </button> 
 
@@ -429,7 +431,7 @@ function TransactionModal({
             <TwitterPreview username={twitterName} isTwitterValid={isTwitterValid} />
             {!data &&              
               <>
-                <Button disabled={!write} onClick={() => write?.()}>
+                <Button disabled={!write} onClick={() => write?.()} className="umami--click--set-twitter-name-button">
                   Set Twitter name
                 </Button>
                 <Link  href="#" onClick={() => setIsOpen(false)} style={{textDecoration: "underline", textAlign: "center", fontSize: "12px"}}>
