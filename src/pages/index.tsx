@@ -87,7 +87,7 @@ export default function Home() {
         />
         <meta
           property="og:image"
-          content="/public/ens.jpeg"
+          content="https://set.twittens.xyz/twitter-ens.jpg"
         />
         <script async defer data-website-id="2bc74b8b-197d-45e2-a0a2-0dc502093a36" src="https://umammprod.up.railway.app/umami.js"></script>
       </Head>
