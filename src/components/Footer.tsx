@@ -10,6 +10,13 @@ export default function Footer() {
           >
             @petrdu
           </a>
+          <a
+            href="https://twittens.xyz/twitter"
+            target="_blank"
+            rel="noreferrer"
+          >
+            @twittensxyz
+          </a>
         </div>
 
         <div className="links">
@@ -19,7 +26,7 @@ export default function Footer() {
               target="_blank"
               rel="noreferrer"
             >
-              Twittens
+              Home
             </a>
           </span>
 
@@ -33,7 +40,7 @@ export default function Footer() {
 
           <span>
             <a 
-              href={process.env.NEXT_PUBLIC_FEEDBACK_FORM as any}
+              href="https://www.twittens.xyz/feedback"
               target="_blank"
               rel="noreferrer"
             >

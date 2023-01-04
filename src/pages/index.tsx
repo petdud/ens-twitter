@@ -229,7 +229,7 @@ export default function Home() {
                 </p>
 
                 <p>
-                  If you want to link more information than just a twitter, we recommend using the ENS portal directly. You can find more information and instructions <a href={"https://dudis.notion.site/How-to-add-your-Twitter-df8b2389dd664d08a85eb333b32f076d"} target="_blank" rel="noreferrer">in our guide</a>.
+                  If you want to link more information than just a twitter, we recommend using the ENS portal directly. You can find more information and instructions <a href="https://twittens.xyz/how-to-add-twitter" target="_blank" rel="noreferrer">in our guide</a>.
                 </p>
                 <Button
                   variant="secondary"
